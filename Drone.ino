@@ -133,6 +133,9 @@ void bluetoothControl()
             delay(15);
             break;
 
+        case 'F':
+            lineFollower();
+
         }
     }
 }
