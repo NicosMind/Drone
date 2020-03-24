@@ -15,23 +15,48 @@ char message;
 int PWM = 0;
 int MoteurSpeed = 0;
 
+
+const int trigPin = 5;
+const int echoPin = 6;
+
+long duration;
+int distance;
+int securityDistance = 5;
+
 void setup() {
     // put your setup code here, to run once:
     Serial.begin(9600);
     BlueT.begin(38400);
+
     Serial.println("ENTER AT Commands:");
+    
     pinMode(Moteur_A, OUTPUT);
     pinMode(Moteur_B, OUTPUT);
     pinMode(ENA, OUTPUT);
+    
+    pinMode(trigPin, OUTPUT); // Sets the trigPin as an Output
+    pinMode(echoPin, INPUT); // Sets the echoPin as an Input
+
     ServoDir.attach(9);
     ServoDir.write(90);
 }
 
 void loop() {
 
-    bluetoothControl();
+    
+    if (proximitySensor() < securityDistance)
+    {
+        digitalWrite(Moteur_A, HIGH);
+        digitalWrite(Moteur_B, LOW);
+        analogWrite(ENA, 255);
+    }
+    else
+    {
+        bluetoothControl();
+    }
    
 }
+
 
 void bluetoothControl()
 {
@@ -77,4 +102,23 @@ void bluetoothControl()
 
         }
     }
+}
+
+int proximitySensor()
+{
+
+        digitalWrite(trigPin, LOW);
+        delayMicroseconds(2);
+        // Sets the trigPin on HIGH state for 10 micro seconds
+        digitalWrite(trigPin, HIGH);
+        delayMicroseconds(10);
+        digitalWrite(trigPin, LOW);
+        // Reads the echoPin, returns the sound wave travel time in microseconds
+        duration = pulseIn(echoPin, HIGH);
+        // Calculating the distance
+        distance = duration * 0.034 / 2;
+        // Prints the distance on the Serial Monitor
+        Serial.print("Distance: ");
+        Serial.println(distance);
+        return distance;
 }
