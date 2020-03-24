@@ -18,10 +18,19 @@ int MoteurSpeed = 0;
 
 const int trigPin = 5;
 const int echoPin = 6;
-
 long duration;
 int distance;
 int securityDistance = 5;
+
+const int leftSensor = 7;
+const int middleSensor = 1;
+const int rightSensor = 3;
+bool stateLeftSensor;
+bool stateMiddleSensor;
+bool stateRightSensor;
+
+int CW;
+int CCW;
 
 void setup() {
     // put your setup code here, to run once:
@@ -34,8 +43,13 @@ void setup() {
     pinMode(Moteur_B, OUTPUT);
     pinMode(ENA, OUTPUT);
     
-    pinMode(trigPin, OUTPUT); // Sets the trigPin as an Output
-    pinMode(echoPin, INPUT); // Sets the echoPin as an Input
+    pinMode(trigPin, OUTPUT); 
+    pinMode(echoPin, INPUT); 
+
+    Serial.begin(9600);
+    pinMode(leftSensor, INPUT);
+    pinMode(middleSensor, INPUT);
+    pinMode(rightSensor, INPUT);
 
     ServoDir.attach(9);
     ServoDir.write(90);
@@ -55,6 +69,26 @@ void loop() {
         bluetoothControl();
     }
    
+}
+
+void powerMotor(int rotation)
+{
+    if (rotation = CW)
+    {
+        digitalWrite(Moteur_A, HIGH);
+        digitalWrite(Moteur_B, LOW);
+    }
+    else
+    {
+        digitalWrite(Moteur_A, LOW);
+        digitalWrite(Moteur_B, HIGH);
+    }
+    analogWrite(ENA, 255);
+}
+
+void direction(int angle)
+{
+    ServoDir.write(angle);
 }
 
 void bluetoothControl()
@@ -116,4 +150,54 @@ int proximitySensor()
         Serial.print("Distance: ");
         Serial.println(distance);
         return distance;
+}
+
+void lineFollower()
+{
+        stateLeftSensor = digitalRead(leftSensor);
+        stateMiddleSensor = digitalRead(middleSensor);
+        stateRightSensor = digitalRead(rightSensor);
+
+        if (stateMiddleSensor) 
+        {
+            if ((stateLeftSensor) && (!stateRightSensor))
+            {
+                Serial.println("Tourner à gauche");
+                powerMotor(CW);
+                direction(0);
+            }
+            else if ((!stateLeftSensor) && (stateRightSensor)) 
+            {
+                Serial.println("Tourner à droite");
+                powerMotor(CW);
+                direction(180);
+            }
+            else 
+            {
+                Serial.println("Continuer tout droit");
+                powerMotor(CW);
+                direction(90);
+            }
+        }
+        else 
+        {
+            if ((stateLeftSensor) && (!stateRightSensor)) 
+            {
+                Serial.println("Tourner à gauche");
+                powerMotor(CW);
+                direction(0);
+            }
+            else if ((!stateLeftSensor) && (stateRightSensor)) 
+            {
+                Serial.println("Tourner à droite");
+                powerMotor(CW);
+                direction(180);
+            }
+            else 
+            {
+                Serial.println("Reculer");
+                powerMotor(CCW);
+                direction(90);
+            }
+        }
 }
