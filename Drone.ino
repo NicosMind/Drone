@@ -29,6 +29,12 @@ void setup() {
 
 void loop() {
 
+    bluetoothControl();
+   
+}
+
+void bluetoothControl()
+{
     if (BlueT.available()) {
         message = BlueT.read();
         Serial.print(message);
